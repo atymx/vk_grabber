@@ -4,19 +4,37 @@
 """
 
 import vk
-from auth import VKAuth
 import config
+import json
+import time
+import webbrowser
 
 
 def getDialogSel(url):
     url_params = url.split('?')[1:][0].split('&')
     for item in url_params:
         if item.split('=')[0] == 'sel':
-            return item.split('=')[1] if item.split('=')[1][0] != 'c' else item.split('=')[1][1:]
+            return item.split('=')[1] if item.split('=')[1][0] != 'c' else 2000000000 + int(item.split('=')[1][1:])
 
 
-Auth = VKAuth(['messages, '], config.vk_app_id, '5.68')
-Auth.auth()
+print('Сейчас сейчас откроется браузер. Дайте приложению доступы, скопируйте токен и вернитесь в консоль')
+time.sleep(4)
+webbrowser.open('https://oauth.vk.com/authorize?client_id={}&scope=photos,audio,video,docs,notes,pages,status,offers,'
+                'questions,wall,groups,messages,email,notifications,stats,ads,offline,docs,pages,stats,'
+                'notifications&response_type=token'.format(config.vk_app_id))
 
-access_token = Auth.get_token()
-user_id = Auth.get_user_id()
+print('Вставьте токен. Для вас это безопасно!')
+access_token = input()
+
+session = vk.Session(access_token=access_token)
+api = vk.API(session)
+
+print('Спасибо, теперь скопируйте ссылку на диалог/беседу')
+sel = getDialogSel(input())
+
+data = api.messages.getHistoryAttachments(peer_id=sel, media_type='photo', count=200)
+
+for i in range(1, len(data) - 1):
+    print(data[str(i)]['photo']['src_big'])
+
+
