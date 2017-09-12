@@ -5,9 +5,10 @@
 
 import vk
 import config
-import json
 import time
 import webbrowser
+import os
+from urllib.request import urlretrieve
 
 
 def getDialogSel(url):
@@ -18,7 +19,7 @@ def getDialogSel(url):
 
 
 print('Сейчас сейчас откроется браузер. Дайте приложению доступы, скопируйте токен и вернитесь в консоль')
-time.sleep(4)
+time.sleep(1)
 webbrowser.open('https://oauth.vk.com/authorize?client_id={}&scope=photos,audio,video,docs,notes,pages,status,offers,'
                 'questions,wall,groups,messages,email,notifications,stats,ads,offline,docs,pages,stats,'
                 'notifications&response_type=token'.format(config.vk_app_id))
@@ -32,9 +33,19 @@ api = vk.API(session)
 print('Спасибо, теперь скопируйте ссылку на диалог/беседу')
 sel = getDialogSel(input())
 
+# Через API Вконтакте получаем вложения(фотографии)
 data = api.messages.getHistoryAttachments(peer_id=sel, media_type='photo', count=200)
 
+# Сохраняем  массив url'ы всех фотографий
+pictures = []
 for i in range(1, len(data) - 1):
-    print(data[str(i)]['photo']['src_big'])
+    pictures.append(data[str(i)]['photo']['src_big'])
 
+# Создаем папку, в которую будем скачивать изображения
+if not os.path.exists('pictures'):
+    os.mkdir('pictures')
 
+count = 0
+for url in pictures:
+    count += 1
+    urlretrieve(url, 'pictures/picture{}.jpg'.format(count))
