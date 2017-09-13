@@ -46,6 +46,18 @@ if not os.path.exists('pictures'):
     os.mkdir('pictures')
 
 count = 0
+errors = 0
 for url in pictures:
     count += 1
-    urlretrieve(url, 'pictures/picture{}.jpg'.format(count))
+    print('Загрузка фотографии {}/{}'.format(count, len(pictures)))
+    print(url)
+    try:
+        urlretrieve(url, 'pictures/img{}.jpg'.format(count))
+    except Exception:
+        print('Не удалось загрузить изображение №{}'.format(count))
+        errors += 1
+    else:
+        print('Изображение №{} успешно загружено'.format(count))
+
+print('Загрузка завершена!')
+print('Количество ошибок - {}'.format(errors))
